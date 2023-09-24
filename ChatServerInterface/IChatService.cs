@@ -13,6 +13,7 @@ namespace ChatServerInterface
     {
 
         [OperationContract]
+        [FaultContract(typeof(ServerFault))]
         void ConnectUser(User user);
 
         [OperationContract]

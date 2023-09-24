@@ -13,5 +13,6 @@ namespace ChatServerInterface
 
         [OperationContract(IsOneWay = true)]
         void ReceiveMessage(Message message);
+
     }
 }

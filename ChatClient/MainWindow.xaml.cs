@@ -36,27 +36,40 @@ namespace ChatClient
 
         private void LoginBtn_Click(object sender, RoutedEventArgs e)
         {
-            //User newUser = new User();
-            //newUser.UserName = usernameTextBox.Text;
-            string username = UsernameTextBox.Text;
-            user = new User(username);
+            try
+            {
+                InstanceContext context = new InstanceContext(this);
+                DuplexChannelFactory<IChatService> factory = new DuplexChannelFactory<IChatService>(context, new NetTcpBinding(), "net.tcp://localhost:8000/ChatService");
+                foob = factory.CreateChannel();
 
-            InstanceContext context = new InstanceContext(this);
-            DuplexChannelFactory<IChatService> factory = new DuplexChannelFactory<IChatService>(context, new NetTcpBinding(), "net.tcp://localhost:8000/ChatService");
-            foob = factory.CreateChannel();
-            foob.ConnectUser(user);
+                string username = UsernameTextBox.Text;
 
-            Title = $"Chat Room - {username}";
+                user = new User(username);
 
-            MessageTextBox.IsEnabled = true;
-            SendBtn.IsEnabled = true;
+                foob.ConnectUser(user);
 
-            chatRoomList = foob.getChatRooms();
+                Title = $"Chat Room - {username}";
 
-            RoomsDDM.ItemsSource = chatRoomList;
+                MessageTextBox.IsEnabled = true;
+                SendBtn.IsEnabled = true;
 
-            LoginPanel.Visibility = Visibility.Collapsed;
-            ChatPanel.Visibility = Visibility.Visible;
+                chatRoomList = foob.getChatRooms();
+
+                RoomsDDM.ItemsSource = chatRoomList;
+
+
+
+                LoginPanel.Visibility = Visibility.Collapsed;
+                ChatPanel.Visibility = Visibility.Visible;
+            }
+            catch (FaultException<ServerFault> ex)
+            {
+                MessageBox.Show(ex.Detail.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         public void ReceiveMessage(Message message)
@@ -86,7 +99,7 @@ namespace ChatClient
 
         private void JoinBtn_Click(object sender, RoutedEventArgs e)
         {
-            if(currRoom != null)
+            if (currRoom != null)
             {
                 foob.ExitChatRoom(currRoom, user);
             }
@@ -109,12 +122,40 @@ namespace ChatClient
 
         private void CreatBtn_Click(object sender, RoutedEventArgs e)
         {
-            string newRoomName = CreateTextBox.Text;
-            foob.CreateChatRoom(newRoomName);
+            try
+            {
+                string newRoomName = CreateTextBox.Text;
+                foob.CreateChatRoom(newRoomName);
 
-            chatRoomList = foob.getChatRooms();
-            RoomsDDM.ItemsSource = chatRoomList;
+                chatRoomList = foob.getChatRooms();
+                RoomsDDM.ItemsSource = chatRoomList;
+                CreateTextBox.Clear();
+            }
+            catch (FaultException<ServerFault> ex)
+            {
+                MessageBox.Show(ex.Detail.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
 
         }
+
+        private void RefreashBtn_Click(object sender, RoutedEventArgs e)
+        {
+            RoomsDDM.Dispatcher.Invoke(new Action(() =>
+            {
+                RoomsDDM.ItemsSource = foob.getChatRooms();
+            }));
+
+            UsersDDM.Dispatcher.Invoke((Action)(() =>
+            {
+                currUsers = foob.getParticipants(currRoom);
+                UsersDDM.ItemsSource = currUsers;
+                UsersDDM.SelectedIndex = 0;
+            }));
+        }
+
     }
 }

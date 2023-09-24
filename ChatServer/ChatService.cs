@@ -11,11 +11,12 @@ namespace ChatServer
 {
     internal class ChatService : IChatService
     {
-        private List<User> _users;
+        public List<string> users = new List<string>();
 
-        //private static readonly List<IChatCallback> clients = new List<IChatCallback>();
         private static readonly Dictionary<User, IChatCallback> clients = new Dictionary<User, IChatCallback>();
         private static readonly List<ChatRoomService> chatRooms = new List<ChatRoomService>();
+
+        public static event Action chatRoomCreated;
 
         public ChatService()
         {
@@ -32,22 +33,33 @@ namespace ChatServer
         {
             var callback = OperationContext.Current.GetCallbackChannel<IChatCallback>();
 
-            if (!clients.ContainsKey(user) && !clients.ContainsValue(callback))
+            lock(clients)
             {
-                clients.Add(user, callback);
-                Console.WriteLine(user.Username + " connected");
+                if (checkUsernameAvailability(user.Username))
+                {
+                    clients.Add(user, callback);
+                    users.Add(user.Username);
+                    Console.WriteLine(user.Username + " connected");
+                }
+                else
+                {
+                    Console.WriteLine($"Invalid username {user.Username}");
+                    ServerFault serverFault = new ServerFault();
+                    serverFault.Message = $"Invalid username {user.Username}";
+                    throw new FaultException<ServerFault>(serverFault, new FaultReason("Invalid username"));
+                }
             }
         }
 
         public void JoinChatRoom(string roomName, User user)
         {
-            ChatRoomService chatRoom = chatRooms.FirstOrDefault(cr =>  cr.roomName == roomName);
+            ChatRoomService chatRoom = chatRooms.FirstOrDefault(cr => cr.roomName == roomName);
 
-            if(chatRoom != null)
+            if (chatRoom != null)
             {
                 foreach (var client in clients)
                 {
-                    if(client.Key.Username == user.Username)
+                    if (client.Key.Username == user.Username)
                     {
                         chatRoom.AddParticipant(client.Key, client.Value);
                     }
@@ -86,8 +98,21 @@ namespace ChatServer
 
         public void CreateChatRoom(string roomName)
         {
-            ChatRoomService chatRoom = new ChatRoomService(roomName);
-            chatRooms.Add(chatRoom);
+            lock (chatRooms)
+            {
+                if (checkChatRoomAvailability(roomName))
+                {
+                    ChatRoomService chatRoom = new ChatRoomService(roomName);
+                    chatRooms.Add(chatRoom);
+                }
+                else
+                {
+                    Console.WriteLine($"Invalid room name {roomName}");
+                    ServerFault serverFault = new ServerFault();
+                    serverFault.Message = $"Invalid room name {roomName}";
+                    throw new FaultException<ServerFault>(serverFault, new FaultReason("Invalid room name"));
+                }
+            }
         }
 
         public List<string> getChatRooms()
@@ -119,19 +144,34 @@ namespace ChatServer
 
         }
 
+        private bool checkUsernameAvailability(string username)
+        {
+            foreach (var user in clients.Keys)
+            {
+                if(user.Username.Equals(username))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private bool checkChatRoomAvailability(string roomName)
+        {
+            foreach (var room in chatRooms)
+            {
+                if (room.roomName.Equals(roomName))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public void DisconnectUser(User user)
         {
-            //IChatCallback key = null;
-
-            //foreach (var client in clients)
-            //{
-            //    if(client.Value == user)
-            //    {
-            //        key = client.Key;
-            //    }
-            //}
-
-            //clients.Remove(key);
+            clients.Remove(user);
+            users.Remove(user.Username);
         }
     }
 }
