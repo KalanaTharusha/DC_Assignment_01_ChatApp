@@ -27,17 +27,18 @@ namespace ChatClient
         private User user;
         private static List<string> chatRoomList = new List<string>();
         private string currRoom;
+        private List<string> currUsers;
 
         public MainWindow()
         {
             InitializeComponent();
         }
 
-        private void LoginButton_Click(object sender, RoutedEventArgs e)
+        private void LoginBtn_Click(object sender, RoutedEventArgs e)
         {
             //User newUser = new User();
             //newUser.UserName = usernameTextBox.Text;
-            string username = usernameTextBox.Text;
+            string username = UsernameTextBox.Text;
             user = new User(username);
 
             InstanceContext context = new InstanceContext(this);
@@ -47,8 +48,8 @@ namespace ChatClient
 
             Title = $"Chat Room - {username}";
 
-            messageTextBox.IsEnabled = true;
-            sendButton.IsEnabled = true;
+            MessageTextBox.IsEnabled = true;
+            SendBtn.IsEnabled = true;
 
             chatRoomList = foob.getChatRooms();
 
@@ -60,19 +61,20 @@ namespace ChatClient
 
         public void ReceiveMessage(Message message)
         {
-            chatTextBox.AppendText($"{message.Time} {message.From}: {message.Text}\n");
+            ChatTextBox.AppendText($"{message.Time.TimeOfDay.Hours}:{message.Time.TimeOfDay.Minutes} {message.From}: {message.Text}\n");
         }
 
-        private async void sendButton_Click(object sender, RoutedEventArgs e)
+        private async void SendBtn_Click(object sender, RoutedEventArgs e)
         {
-            string text = messageTextBox.Text;
-            Message message = new Message(text, user.Username, "all");
+            string to = UsersDDM.SelectedItem.ToString();
+            string text = MessageTextBox.Text;
+            Message message = new Message(text, user.Username, to);
 
             await Task.Run(() =>
             {
                 foob.SendMessage(currRoom, message);
             });
-            messageTextBox.Clear();
+            MessageTextBox.Clear();
         }
 
         private void LogOutBtn_Click(object sender, RoutedEventArgs e)
@@ -84,6 +86,11 @@ namespace ChatClient
 
         private void JoinBtn_Click(object sender, RoutedEventArgs e)
         {
+            if(currRoom != null)
+            {
+                foob.ExitChatRoom(currRoom, user);
+            }
+
             Object selectedRoom = RoomsDDM.SelectedItem;
 
             if (selectedRoom != null)
@@ -91,7 +98,23 @@ namespace ChatClient
                 currRoom = selectedRoom.ToString();
                 foob.JoinChatRoom(currRoom, user);
                 ChatRoomLbl.Content = currRoom;
+
+                ChatTextBox.Clear();
+                currUsers = foob.getParticipants(currRoom);
+                UsersDDM.ItemsSource = currUsers;
+                UsersDDM.SelectedIndex = 0;
+
             }
+        }
+
+        private void CreatBtn_Click(object sender, RoutedEventArgs e)
+        {
+            string newRoomName = CreateTextBox.Text;
+            foob.CreateChatRoom(newRoomName);
+
+            chatRoomList = foob.getChatRooms();
+            RoomsDDM.ItemsSource = chatRoomList;
+
         }
     }
 }

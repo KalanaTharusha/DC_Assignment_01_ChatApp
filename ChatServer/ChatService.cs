@@ -56,15 +56,38 @@ namespace ChatServer
 
         }
 
+        public void ExitChatRoom(string roomName, User user)
+        {
+            ChatRoomService chatRoom = chatRooms.FirstOrDefault(cr => cr.roomName == roomName);
+
+            if (chatRoom != null)
+            {
+                foreach (var client in clients)
+                {
+                    if (client.Key.Username == user.Username)
+                    {
+                        chatRoom.RemoveParticipant(client.Key, client.Value);
+                    }
+                }
+            }
+
+        }
+
         public void SendMessage(string roomName, Message message)
         {
             ChatRoomService chatRoom = chatRooms.FirstOrDefault(cr => cr.roomName == roomName);
 
             if (chatRoom != null)
             {
-                chatRoom.BroadCastMessage(message);
+                chatRoom.BroadcastMessage(message);
             }
 
+        }
+
+        public void CreateChatRoom(string roomName)
+        {
+            ChatRoomService chatRoom = new ChatRoomService(roomName);
+            chatRooms.Add(chatRoom);
         }
 
         public List<string> getChatRooms()
@@ -72,10 +95,28 @@ namespace ChatServer
             List<String> roomList = new List<String>();
             foreach (var room in chatRooms)
             {
-                roomList.Add(room.roomName);
+                if (!roomList.Contains(room.roomName))
+                {
+                    roomList.Add(room.roomName);
+                }
             }
 
             return roomList;
+        }
+
+        public List<string> getParticipants(string roomName)
+        {
+
+            foreach (var room in chatRooms)
+            {
+                if (room.roomName.Equals(roomName))
+                {
+                    return room.participantNames();
+                }
+            }
+
+            return null;
+
         }
 
         public void DisconnectUser(User user)
