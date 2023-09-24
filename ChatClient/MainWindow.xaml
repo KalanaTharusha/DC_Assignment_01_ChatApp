@@ -15,16 +15,32 @@
             </StackPanel>
         </Border>
 
-        <Border Name="ChatPanel" Visibility="Collapsed" >
-            <StackPanel>
+        <Border Name="ChatPanel" Visibility="Collapsed" Background="AliceBlue">
 
-                <TextBox Name="chatTextBox" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                 IsReadOnly="True" Margin="10,50,10,100"/>
+            <Grid>
 
-                <TextBox Name="messageTextBox" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="400" Height="30" Margin="10" />
-                <Button Content="Send" Name="sendButton" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="80" Height="30" Margin="420,0,0,10" Click="sendButton_Click" />
+                <Grid Margin="200,0,0,0" HorizontalAlignment="Center" Width="590">
 
-            </StackPanel>
+                    <TextBox Name="chatTextBox" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" IsReadOnly="True" Margin="0,58,10,55" HorizontalAlignment="Right" Width="570"/>
+
+                    <TextBox Name="messageTextBox" VerticalAlignment="Bottom" Height="30" Margin="10,0,79,10" />
+                    <Button Content="Send" Name="sendButton" VerticalAlignment="Bottom" Height="30" Margin="526,0,10,10" Click="sendButton_Click" />
+                    <Label x:Name="ChatRoomLbl" Content="Chat Room" HorizontalAlignment="Left" Margin="10,19,0,0" VerticalAlignment="Top" Width="178"/>
+
+                </Grid>
+
+                <StackPanel Width="200" HorizontalAlignment="Left" Background="White">
+                    <Label Margin="10,10,10,0">Join Chat Rooms</Label>
+
+                    <ComboBox Name="RoomsDDM" Margin="10"></ComboBox>
+                    <Button x:Name="JoinBtn" Margin="10" Click="JoinBtn_Click">JOIN</Button>
+
+                    <Button x:Name="LogOutBtn" Margin="10" Click="LogOutBtn_Click">LOG OUT</Button>
+
+                </StackPanel>
+
+            </Grid>
+
         </Border>
     </Grid>
 </Window>
