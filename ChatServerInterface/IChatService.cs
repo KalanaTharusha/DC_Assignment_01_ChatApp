@@ -8,10 +8,14 @@ using DLL;
 
 namespace ChatServerInterface
 {
-    [ServiceContract]
+    [ServiceContract(CallbackContract = typeof(IChatCallback))]
     public interface IChatService
     {
+
         [OperationContract]
-        void Connect(User user);
+        void ConnectUser(string username);
+
+        [OperationContract]
+        void SendMessage(string username, string message);
     }
 }
