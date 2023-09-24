@@ -9,19 +9,52 @@ using System.Threading.Tasks;
 
 namespace ChatServer
 {
-    [ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Multiple, UseSynchronizationContext = false)]
     internal class ChatService : IChatService
     {
         private List<User> _users;
+        private static readonly List<IChatCallback> clients = new List<IChatCallback>();
+
         public ChatService()
         {
             _users = new List<User>();
         }
 
-        public void Connect(User user)
+        public void ConnectUser(string username)
         {
-            _users.Add(user);
-            Console.WriteLine(user.UserName + " Connected");
+            var callback = OperationContext.Current.GetCallbackChannel<IChatCallback>();
+
+            if (!clients.Contains(callback))
+            {
+                clients.Add(callback);
+                Console.WriteLine(username + " connected");
+            }
+        }
+
+        public void SendMessage(string username, string message)
+        {
+            Console.WriteLine(message);
+
+            foreach (var client in clients)
+            {
+                client.ReceiveMessage(username, message);
+                Console.WriteLine(message + " sent to " + client);
+            }
+        }
+
+
+
+
+
+        private bool _IsUserConnected(string username)
+        {
+            foreach (var user in _users)
+            {
+                if (user.UserName == username)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

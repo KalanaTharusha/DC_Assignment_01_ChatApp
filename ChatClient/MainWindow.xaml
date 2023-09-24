@@ -9,7 +9,7 @@
     <Grid>
         <Border Name="LoginPanel" Visibility="Visible">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <TextBlock Text="Enter Your Username:" Margin="5"/>
+                <TextBlock Text="Username:" Margin="5"/>
                 <TextBox Name="usernameTextBox" Width="200" Margin="5"/>
                 <Button Content="Login" Width="100" Margin="5" Click="LoginButton_Click"/>
             </StackPanel>
@@ -18,12 +18,11 @@
         <Border Name="ChatPanel" Visibility="Collapsed" >
             <StackPanel>
 
-                <ListView Name="chatListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                    
-                </ListView>
+                <TextBox Name="chatTextBox" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                 IsReadOnly="True" Margin="10,50,10,100"/>
 
                 <TextBox Name="messageTextBox" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="400" Height="30" Margin="10" />
-                <Button Content="Send" Name="sendButton" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="80" Height="30" Margin="420,0,0,10" Click="SendButton_Click" />
+                <Button Content="Send" Name="sendButton" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="80" Height="30" Margin="420,0,0,10" Click="sendButton_Click" />
 
             </StackPanel>
         </Border>
