@@ -6,7 +6,14 @@ using System.Threading.Tasks;
 
 namespace DLL
 {
-    internal class User
+    public class User
     {
+        public User()
+        {
+            UserID = Guid.NewGuid().ToString();
+        }
+        public string UserID { get; set; }
+        public string UserName { get; set; }
+
     }
 }
