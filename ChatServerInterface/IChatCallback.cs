@@ -14,5 +14,10 @@ namespace ChatServerInterface
         [OperationContract(IsOneWay = true)]
         void ReceiveMessage(Message message);
 
+        [OperationContract(IsOneWay = true)]
+        void UpdateChatRoomInfo(string chatRoomName);
+
+        [OperationContract(IsOneWay = true)]
+        void OnUserJoinedChatRoom(string username);
     }
 }
