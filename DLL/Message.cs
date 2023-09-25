@@ -16,7 +16,7 @@ namespace DLL
             this.From = from;
             this.To = to;
             this.Text = text;
-            this.Attachemnt = null; // need to implement
+            this.Attachemnt = null;
         }
         [DataMember]
         public DateTime Time { get; set; }
