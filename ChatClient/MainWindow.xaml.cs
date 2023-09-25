@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using ChatServerInterface;
 using System.ServiceModel;
 using DLL;
+using System.Collections.ObjectModel;
 
 namespace ChatClient
 {
@@ -25,7 +26,8 @@ namespace ChatClient
     {
         private IChatService service;
         private User user;
-        private static List<string> chatRoomList = new List<string>();
+        private static ObservableCollection<string> chatRoomList = new ObservableCollection<string>();
+        private ObservableCollection<string> chatRoomParticipantList;
         private string currRoom;
 
         public MainWindow()
@@ -58,7 +60,7 @@ namespace ChatClient
                 SendBtn.IsEnabled = true;
 
                 chatRoomList = service.getChatRooms();
-
+                
                 RoomsDDM.ItemsSource = chatRoomList;
 
                 LoginPanel.Visibility = Visibility.Collapsed;
@@ -130,13 +132,19 @@ namespace ChatClient
                 if (selectedRoom != null)
                 {
                     currRoom = selectedRoom.ToString();
-                    service.JoinChatRoom(currRoom, user);
+                    Task.Run(() =>
+                    {
+                        service.JoinChatRoom(currRoom, user);
+                    });
+
                     ChatRoomLbl.Content = currRoom;
 
                     //ChatTextBox.Clear();
                     ChatTextBox.Document.Blocks.Clear();
 
-                    UsersDDM.ItemsSource = service.getParticipants(currRoom).Where(p => p != user.Username).ToList();
+                    //UsersDDM.ItemsSource = service.getParticipants(currRoom).Where(p => p != user.Username).ToList();
+                    chatRoomParticipantList = new ObservableCollection<string>(service.getParticipants(currRoom).Where(p => p != user.Username).ToList());
+                    UsersDDM.ItemsSource = chatRoomParticipantList;
                     UsersDDM.SelectedIndex = 0;
 
                     TextPanel.Visibility = Visibility.Visible;
@@ -149,15 +157,18 @@ namespace ChatClient
             }
         }
 
+
+
         private void CreatBtn_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 string newRoomName = CreateTextBox.Text;
-                service.CreateChatRoom(newRoomName);
+                Task.Run(() =>
+                {
+                    service.CreateChatRoom(newRoomName);
 
-                chatRoomList = service.getChatRooms();
-                RoomsDDM.ItemsSource = chatRoomList;
+                });
                 CreateTextBox.Clear();
             }
             catch (FaultException<ServerFault> ex)
@@ -175,11 +186,6 @@ namespace ChatClient
         {
             try
             {
-                RoomsDDM.Dispatcher.Invoke(new Action(() =>
-                {
-                    RoomsDDM.ItemsSource = service.getChatRooms();
-                }));
-
                 UsersDDM.Dispatcher.Invoke((Action)(() =>
                 {
                     UsersDDM.ItemsSource = service.getParticipants(currRoom).Where(p => p != user.Username).ToList();
@@ -189,6 +195,25 @@ namespace ChatClient
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+            }
+        }
+
+        public void UpdateChatRoomInfo(string chatRoomName)
+        {
+           chatRoomList.Add(chatRoomName);
+        }
+
+        public void OnUserJoinedChatRoom(string username)
+        {
+            //UsersDDM.Dispatcher.Invoke((Action)(() =>
+            //{
+            //UsersDDM.ItemsSource = service.getParticipants(currRoom).Where(p => p != user.Username).ToList();
+            //UsersDDM.SelectedIndex = 0;
+            //}));
+            MessageBox.Show("Callback trigger for onUserJoinedChatRoom");
+            if (username != user.Username)
+            {
+                chatRoomParticipantList.Add(username);
             }
         }
 

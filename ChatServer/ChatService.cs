@@ -2,6 +2,7 @@
 using DLL;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.ServiceModel;
 using System.Text;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace ChatServer
 {
+    //[ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Multiple)]
     internal class ChatService : IChatService
     {
         public List<string> users = new List<string>();
@@ -60,7 +62,10 @@ namespace ChatServer
                     if (client.Key.Username == user.Username)
                     {
                         chatRoom.AddParticipant(client.Key, client.Value);
+
                     }
+                    client.Value.OnUserJoinedChatRoom(user.Username);
+
                 }
             }
 
@@ -101,7 +106,13 @@ namespace ChatServer
                 if (checkChatRoomAvailability(roomName))
                 {
                     ChatRoomService chatRoom = new ChatRoomService(roomName);
+                    Console.WriteLine($"Adding new chat room : {roomName}");
                     chatRooms.Add(chatRoom);
+                    foreach (var client in clients)
+                    {
+                        client.Value.UpdateChatRoomInfo(roomName);
+                        Console.WriteLine($"Updating: {client.Key.Username}");
+                    }
                 }
                 else
                 {
@@ -111,11 +122,13 @@ namespace ChatServer
                     throw new FaultException<ServerFault>(serverFault, new FaultReason("Invalid room name"));
                 }
             }
+            Console.WriteLine("Update done");
+
         }
 
-        public List<string> getChatRooms()
+        public ObservableCollection<string> getChatRooms()
         {
-            List<String> roomList = new List<String>();
+            ObservableCollection<string> roomList = new ObservableCollection<string>();
             foreach (var room in chatRooms)
             {
                 if (!roomList.Contains(room.roomName))
