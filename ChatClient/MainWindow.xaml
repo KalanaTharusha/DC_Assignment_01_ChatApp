@@ -15,7 +15,7 @@
             </StackPanel>
         </Border>
 
-        <Border Name="ChatPanel" Visibility="Visible" Background="AliceBlue">
+        <Border Name="ChatPanel" Visibility="Collapsed" Background="AliceBlue">
 
             <Grid>
 
