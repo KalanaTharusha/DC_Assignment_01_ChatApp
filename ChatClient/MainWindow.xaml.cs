@@ -124,7 +124,10 @@ namespace ChatClient
             {
                 if (currRoom != null)
                 {
-                    service.ExitChatRoom(currRoom, user);
+                    Task.Run(() =>
+                    {
+                        service.ExitChatRoom(currRoom, user);
+                    });
                 }
 
                 Object selectedRoom = RoomsDDM.SelectedItem;
@@ -139,7 +142,6 @@ namespace ChatClient
 
                     ChatRoomLbl.Content = currRoom;
 
-                    //ChatTextBox.Clear();
                     ChatTextBox.Document.Blocks.Clear();
 
                     //UsersDDM.ItemsSource = service.getParticipants(currRoom).Where(p => p != user.Username).ToList();
@@ -205,17 +207,19 @@ namespace ChatClient
 
         public void OnUserJoinedChatRoom(string username)
         {
-            //UsersDDM.Dispatcher.Invoke((Action)(() =>
-            //{
-            //UsersDDM.ItemsSource = service.getParticipants(currRoom).Where(p => p != user.Username).ToList();
-            //UsersDDM.SelectedIndex = 0;
-            //}));
-            MessageBox.Show("Callback trigger for onUserJoinedChatRoom");
             if (username != user.Username)
             {
                 chatRoomParticipantList.Add(username);
             }
         }
 
+        public void OnUserLeaveChatRoom(string username)
+        {
+            
+            if (chatRoomParticipantList.Contains(username))
+            {
+                chatRoomParticipantList.Remove(username);
+            }
+        }
     }
 }

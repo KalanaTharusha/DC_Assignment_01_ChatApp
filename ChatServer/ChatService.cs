@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ChatServer
 {
-    //[ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Multiple)]
+    [ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Multiple)]
     internal class ChatService : IChatService
     {
         public List<string> users = new List<string>();
@@ -64,7 +64,6 @@ namespace ChatServer
                         chatRoom.AddParticipant(client.Key, client.Value);
 
                     }
-                    client.Value.OnUserJoinedChatRoom(user.Username);
 
                 }
             }
