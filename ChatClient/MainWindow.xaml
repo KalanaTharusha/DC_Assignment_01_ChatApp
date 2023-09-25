@@ -23,7 +23,11 @@
 
                     <ComboBox x:Name="UsersDDM" Margin="10,0,475,10" Height="30" VerticalAlignment="Bottom"></ComboBox>
 
-                    <TextBox Name="ChatTextBox" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" IsReadOnly="True" Margin="0,58,10,55" HorizontalAlignment="Right" Width="570"/>
+                    <RichTextBox Name="ChatTextBox" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" IsReadOnly="True" Margin="0,58,10,55" HorizontalAlignment="Right" Width="570">
+                        <FlowDocument>
+                            
+                        </FlowDocument>
+                    </RichTextBox>
 
                     <TextBox Name="MessageTextBox" VerticalAlignment="Bottom" Height="30" Margin="120,0,79,10" />
                     <Button Content="SEND" x:Name="SendBtn" VerticalAlignment="Bottom" Height="30" Margin="526,0,10,10" Click="SendBtn_Click" />
