@@ -77,7 +77,11 @@ namespace ChatClient
 
         public void ReceiveMessage(Message message)
         {
-            ChatTextBox.AppendText($"{message.Time.TimeOfDay.Hours}:{message.Time.TimeOfDay.Minutes} {message.From}: {message.Text}\n");
+            //ChatTextBox.AppendText($"{message.Time.TimeOfDay.Hours}:{message.Time.TimeOfDay.Minutes} {message.From}: {message.Text}\n");
+
+            Paragraph paragraph = new Paragraph();
+            paragraph.Inlines.Add(new Run($"{message.Time.TimeOfDay.Hours}:{message.Time.TimeOfDay.Minutes} {message.From}: {message.Text}\n"));
+            ChatTextBox.Document.Blocks.Add(paragraph);
         }
 
         private async void SendBtn_Click(object sender, RoutedEventArgs e)
@@ -129,7 +133,8 @@ namespace ChatClient
                     service.JoinChatRoom(currRoom, user);
                     ChatRoomLbl.Content = currRoom;
 
-                    ChatTextBox.Clear();
+                    //ChatTextBox.Clear();
+                    ChatTextBox.Document.Blocks.Clear();
 
                     UsersDDM.ItemsSource = service.getParticipants(currRoom).Where(p => p != user.Username).ToList();
                     UsersDDM.SelectedIndex = 0;
