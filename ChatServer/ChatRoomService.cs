@@ -48,10 +48,9 @@ namespace ChatServerInterface
             {
                 foreach (var participant in participants)
                 {
-                    if (participant.Key.Username.Equals(message.To))
+                    if (participant.Key.Username.Equals(message.To) || participant.Key.Username.Equals(message.From))
                     {
                         participant.Value.ReceiveMessage(message);
-                        break;
                     }
                 }
             }
