@@ -23,7 +23,8 @@
 
                     <ComboBox x:Name="UsersDDM" Margin="10,0,475,10" Height="30" VerticalAlignment="Bottom"></ComboBox>
 
-                    <RichTextBox Name="ChatTextBox" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" IsReadOnly="True" Margin="0,58,0,76" HorizontalAlignment="Center" Width="570">
+                    <RichTextBox Name="ChatTextBox" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" IsReadOnly="True" Margin="0,58,0,70" HorizontalAlignment="Center" Width="570" Block.LineHeight="1" IsDocumentEnabled="True">
+
                         <FlowDocument>
 
                         </FlowDocument>
@@ -33,7 +34,7 @@
                     <Button Content="Select file" x:Name="SelectFileBtn" VerticalAlignment="Bottom" Height="30" Margin="444,0,69,10" Click="SelectFileBtn_Click" />
                     <Button Content="SEND" x:Name="SendBtn" VerticalAlignment="Bottom" Height="30" Margin="526,0,10,10" Click="SendBtn_Click" />
                     <Label x:Name="ChatRoomLbl" Content="Chat Room" HorizontalAlignment="Left" Margin="10,19,0,0" VerticalAlignment="Top" Width="178"/>
-                    <Label Content="Selected file path:" x:Name="SelectedFilePathLabel" HorizontalAlignment="Left" Height="25" Margin="120,413,0,0" VerticalAlignment="Top" Width="460"/>
+                    <Label Content="Selected file path:" x:Name="SelectedFilePathLabel" HorizontalAlignment="Left" Height="25" Margin="120,0,0,40" VerticalAlignment="Bottom" Width="460"/>
 
                 </Grid>
 
