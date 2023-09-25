@@ -18,28 +18,17 @@ namespace ChatServer
 
         static void Main(string[] args)
         {
-            //Console.WriteLine("Chat server started");
-
-            //ServiceHost host;
-
-            //NetTcpBinding tcp = new NetTcpBinding();
-
-            //host = new ServiceHost(typeof(ChatService));
-
-            //host.AddServiceEndpoint(typeof(IChatService), tcp, "net.tcp://0.0.0.0:8000/ChatService");
-            //host.Open();
-            //Console.WriteLine("Chat Server Online");
-            //Console.ReadLine();
-            //host.Close();
 
             Console.WriteLine("Chat server started");
 
             ServiceHost host = new ServiceHost(typeof(ChatService));
             NetTcpBinding netTcpBinding = new NetTcpBinding();
             netTcpBinding.MaxReceivedMessageSize = 200_000_000;
+
             XmlDictionaryReaderQuotas readerQuotas = new System.Xml.XmlDictionaryReaderQuotas();
             readerQuotas.MaxArrayLength = 200_000_000;
             netTcpBinding.ReaderQuotas = readerQuotas;
+
             host.AddServiceEndpoint(typeof(IChatService), netTcpBinding, "net.tcp://localhost:8000/ChatService");
             var behavior = new ServiceMetadataBehavior { HttpGetEnabled = false };
             host.Description.Behaviors.Add(behavior);
