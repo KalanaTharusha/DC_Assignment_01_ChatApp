@@ -34,6 +34,7 @@ namespace ChatClient
         private ObservableCollection<string> chatRoomParticipantList;
         private string currRoom;
         private string selectedFilePath;
+        private string filename;
 
         public MainWindow()
         {
@@ -90,20 +91,54 @@ namespace ChatClient
 
             Paragraph paragraph = new Paragraph();
             paragraph.Inlines.Add(new Run($"{message.Time.TimeOfDay.Hours}:{message.Time.TimeOfDay.Minutes} {message.From}: {message.Text}\n"));
-            if (message.Attachemnts != null)
+            if (message.Attachemnt != null)
             {
-                MemoryStream memoryStream = new MemoryStream(message.Attachemnts);
-                Bitmap bitmap = new Bitmap(memoryStream);
-                System.Windows.Controls.Image image = new System.Windows.Controls.Image();
+                //MemoryStream memoryStream = new MemoryStream(message.Attachemnts);
+                //Bitmap bitmap = new Bitmap(memoryStream);
+                //System.Windows.Controls.Image image = new System.Windows.Controls.Image();
 
-                BitmapSource bitmapSource = Imaging.CreateBitmapSourceFromHBitmap(bitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                image.Source = bitmapSource;
+                //BitmapSource bitmapSource = Imaging.CreateBitmapSourceFromHBitmap(bitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                //image.Source = bitmapSource;
 
-                InlineUIContainer inlineUIContainer = new InlineUIContainer(image);
-                paragraph.Inlines.Add(inlineUIContainer);
+                //InlineUIContainer inlineUIContainer = new InlineUIContainer(image);
+                //paragraph.Inlines.Add(inlineUIContainer);
+
+                Hyperlink hyperlink = new Hyperlink();
+                hyperlink.TextDecorations = TextDecorations.Underline;
+
+                string imageStorageDirectory = Directory.GetCurrentDirectory() + "\\images";
+
+                if (!Directory.Exists(imageStorageDirectory))
+                {
+                    Directory.CreateDirectory(imageStorageDirectory);
+                }
+                string filepath = Directory.GetCurrentDirectory() + $"\\images\\{DateTime.Now:yyyyMMddHHmmssfff}" + message.Filename;
+
+                File.WriteAllBytes(filepath, message.Attachemnt);
+
+                hyperlink.Inlines.Add(new Run(filepath));
+                hyperlink.NavigateUri = new Uri(filepath);
+                hyperlink.RequestNavigate += OpenFileFromHyperLink;
+
+                paragraph.Inlines.Add(hyperlink);
             }
             ChatTextBox.Document.Blocks.Add(paragraph);
         }
+
+
+        private void OpenFileFromHyperLink(object sender, RequestNavigateEventArgs e)
+        {
+            try
+            {
+                Uri uri = new Uri(e.Uri.ToString());
+                System.Diagnostics.Process.Start(uri.LocalPath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening file: {ex.Message}");
+            }
+        }
+
 
         private async void SendBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -113,12 +148,13 @@ namespace ChatClient
                 string text = MessageTextBox.Text;
 
 
-                if (!string.IsNullOrWhiteSpace(text))
+                if (!string.IsNullOrWhiteSpace(text) || selectedFilePath != null)
                 {
                     Message message = new Message(text, user.Username, to);
                     if (selectedFilePath != null)
                     {
-                        message.setAttachment(File.ReadAllBytes(selectedFilePath));
+                        message.Attachemnt = File.ReadAllBytes(selectedFilePath);
+                        message.Filename = filename;
                     }
 
                     await Task.Run(() =>
@@ -240,7 +276,7 @@ namespace ChatClient
                 if (result == true)
                 {
                     selectedFilePath = openFileDialog.FileName;
-                    string filename = System.IO.Path.GetFileName(selectedFilePath);
+                    filename = System.IO.Path.GetFileName(selectedFilePath);
                     SelectedFilePathLabel.Content = $"Selected file : {filename}";
                 }
             }

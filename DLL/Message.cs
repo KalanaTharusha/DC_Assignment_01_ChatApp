@@ -16,7 +16,7 @@ namespace DLL
             this.From = from;
             this.To = to;
             this.Text = text;
-            this.Attachemnts = null; // need to implement
+            this.Attachemnt = null; // need to implement
         }
         [DataMember]
         public DateTime Time { get; set; }
@@ -31,11 +31,10 @@ namespace DLL
         public string Text { get; set; }
 
         [DataMember]
-        public byte[] Attachemnts { get; set; }
+        public byte[] Attachemnt { get; set; }
 
-        public void setAttachment(byte[] attachment)
-        {
-            Attachemnts = attachment;
-        }
+        [DataMember]
+        public string Filename { get; set; }
+
     }
 }
