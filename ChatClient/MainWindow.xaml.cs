@@ -34,7 +34,7 @@ namespace ChatClient
         private ObservableCollection<string> chatRoomParticipantList;
         private string currRoom;
         private string selectedFilePath;
-        private string filename;
+        private string selectedFilename;
 
         public MainWindow()
         {
@@ -93,7 +93,7 @@ namespace ChatClient
             paragraph.Inlines.Add(new Run($"{message.Time.TimeOfDay.Hours}:{message.Time.TimeOfDay.Minutes} {message.From}: {message.Text}\n"));
             if (message.Attachemnt != null)
             {
-                //MemoryStream memoryStream = new MemoryStream(message.Attachemnts);
+                //MemoryStream memoryStream = new MemoryStream(message.Attachemnt);
                 //Bitmap bitmap = new Bitmap(memoryStream);
                 //System.Windows.Controls.Image image = new System.Windows.Controls.Image();
 
@@ -154,7 +154,7 @@ namespace ChatClient
                     if (selectedFilePath != null)
                     {
                         message.Attachemnt = File.ReadAllBytes(selectedFilePath);
-                        message.Filename = filename;
+                        message.Filename = selectedFilename;
                     }
 
                     await Task.Run(() =>
@@ -165,6 +165,9 @@ namespace ChatClient
 
                 MessageTextBox.Clear();
                 SelectedFilePathLabel.Content = "Selected file : ";
+                selectedFilePath = null;
+                selectedFilename = null;
+
 
             } catch(Exception ex)
             {
@@ -270,8 +273,8 @@ namespace ChatClient
                 if (result == true)
                 {
                     selectedFilePath = openFileDialog.FileName;
-                    filename = System.IO.Path.GetFileName(selectedFilePath);
-                    SelectedFilePathLabel.Content = $"Selected file : {filename}";
+                    selectedFilename = System.IO.Path.GetFileName(selectedFilePath);
+                    SelectedFilePathLabel.Content = $"Selected file : {selectedFilename}";
                 }
             }
             catch (Exception exception)
