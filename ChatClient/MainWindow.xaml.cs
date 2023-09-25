@@ -224,6 +224,12 @@ namespace ChatClient
             try
             {
                 string newRoomName = CreateTextBox.Text;
+
+                if (string.IsNullOrWhiteSpace(newRoomName))
+                {
+                    throw new Exception("ChatRoom Name cannot be empty!");
+                }
+
                 Task.Run(() =>
                 {
                     service.CreateChatRoom(newRoomName);

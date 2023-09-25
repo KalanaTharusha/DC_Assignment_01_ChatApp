@@ -22,9 +22,8 @@
                 <Grid Name="TextPanel" Margin="200,0,0,0" HorizontalAlignment="Center" Width="590">
 
                     <ComboBox x:Name="UsersDDM" Margin="10,0,475,10" Height="30" VerticalAlignment="Bottom"></ComboBox>
-
+                  
                     <RichTextBox Name="ChatTextBox" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" IsReadOnly="True" Margin="0,58,0,70" HorizontalAlignment="Center" Width="570" Block.LineHeight="1" IsDocumentEnabled="True">
-
                         <FlowDocument>
 
                         </FlowDocument>
