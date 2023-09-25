@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="525" Width="800">
     <Grid>
-        <Border Name="LoginPanel" Visibility="Visible">
+        <Border Name="LoginPanel" Visibility="Collapsed">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <TextBlock Text="Username:" Margin="5"/>
                 <TextBox Name="UsernameTextBox" Width="200" Margin="5"/>
@@ -15,7 +15,7 @@
             </StackPanel>
         </Border>
 
-        <Border Name="ChatPanel" Visibility="Collapsed" Background="AliceBlue">
+        <Border Name="ChatPanel" Visibility="Visible" Background="AliceBlue">
 
             <Grid>
 
