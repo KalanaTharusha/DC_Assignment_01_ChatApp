@@ -11,50 +11,174 @@ namespace ChatServer
 {
     internal class ChatService : IChatService
     {
-        private List<User> _users;
-        private static readonly List<IChatCallback> clients = new List<IChatCallback>();
+        public List<string> users = new List<string>();
+
+        private static readonly Dictionary<User, IChatCallback> clients = new Dictionary<User, IChatCallback>();
+        private static readonly List<ChatRoomService> chatRooms = new List<ChatRoomService>();
 
         public ChatService()
         {
-            _users = new List<User>();
+            if (chatRooms.Count == 0)
+            {
+                ChatRoomService cr1 = new ChatRoomService("chat room 1");
+                ChatRoomService cr2 = new ChatRoomService("chat room 2");
+                chatRooms.Add(cr1);
+                chatRooms.Add(cr2);
+            }
         }
 
-        public void ConnectUser(string username)
+        public void ConnectUser(User user)
         {
             var callback = OperationContext.Current.GetCallbackChannel<IChatCallback>();
 
-            if (!clients.Contains(callback))
+            lock(clients)
             {
-                clients.Add(callback);
-                Console.WriteLine(username + " connected");
-            }
-        }
-
-        public void SendMessage(string username, string message)
-        {
-            Console.WriteLine(message);
-
-            foreach (var client in clients)
-            {
-                client.ReceiveMessage(username, message);
-                Console.WriteLine(message + " sent to " + client);
-            }
-        }
-
-
-
-
-
-        private bool _IsUserConnected(string username)
-        {
-            foreach (var user in _users)
-            {
-                if (user.UserName == username)
+                if (checkUsernameAvailability(user.Username))
                 {
-                    return true;
+                    clients.Add(user, callback);
+                    users.Add(user.Username);
+                    Console.WriteLine(user.Username + " connected");
+                }
+                else
+                {
+                    Console.WriteLine($"Invalid username {user.Username}");
+                    ServerFault serverFault = new ServerFault();
+                    serverFault.Message = $"Invalid username {user.Username}";
+                    throw new FaultException<ServerFault>(serverFault, new FaultReason("Invalid username"));
                 }
             }
-            return false;
+        }
+
+        public void JoinChatRoom(string roomName, User user)
+        {
+            ChatRoomService chatRoom = chatRooms.FirstOrDefault(cr => cr.roomName == roomName);
+
+            if (chatRoom != null)
+            {
+                foreach (var client in clients)
+                {
+                    if (client.Key.Username == user.Username)
+                    {
+                        chatRoom.AddParticipant(client.Key, client.Value);
+                    }
+                }
+            }
+
+        }
+
+        public void ExitChatRoom(string roomName, User user)
+        {
+            ChatRoomService chatRoom = chatRooms.FirstOrDefault(cr => cr.roomName == roomName);
+
+            if (chatRoom != null)
+            {
+                foreach (var client in clients)
+                {
+                    if (client.Key.Username == user.Username)
+                    {
+                        chatRoom.RemoveParticipant(client.Key, client.Value);
+                    }
+                }
+            }
+
+        }
+
+        public void SendMessage(string roomName, Message message)
+        {
+            ChatRoomService chatRoom = chatRooms.FirstOrDefault(cr => cr.roomName == roomName);
+
+            if (chatRoom != null)
+            {
+                chatRoom.BroadcastMessage(message);
+            }
+
+        }
+
+        public void CreateChatRoom(string roomName)
+        {
+            lock (chatRooms)
+            {
+                if (checkChatRoomAvailability(roomName))
+                {
+                    ChatRoomService chatRoom = new ChatRoomService(roomName);
+                    chatRooms.Add(chatRoom);
+                }
+                else
+                {
+                    Console.WriteLine($"Invalid room name {roomName}");
+                    ServerFault serverFault = new ServerFault();
+                    serverFault.Message = $"Invalid room name {roomName}";
+                    throw new FaultException<ServerFault>(serverFault, new FaultReason("Invalid room name"));
+                }
+            }
+        }
+
+        public List<string> getChatRooms()
+        {
+            List<String> roomList = new List<String>();
+            foreach (var room in chatRooms)
+            {
+                if (!roomList.Contains(room.roomName))
+                {
+                    roomList.Add(room.roomName);
+                }
+            }
+
+            return roomList;
+        }
+
+        public List<string> getParticipants(string roomName)
+        {
+
+            foreach (var room in chatRooms)
+            {
+                if (room.roomName.Equals(roomName))
+                {
+                    return room.participantNames();
+                }
+            }
+
+            return null;
+
+        }
+
+        private bool checkUsernameAvailability(string username)
+        {
+            foreach (var user in clients.Keys)
+            {
+                if(user.Username.Equals(username))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private bool checkChatRoomAvailability(string roomName)
+        {
+            foreach (var room in chatRooms)
+            {
+                if (room.roomName.Equals(roomName))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public void DisconnectUser(User user)
+        {
+            lock(clients)
+            {
+                User disconnectedUser = clients.FirstOrDefault(u => u.Key.Username.Equals(user.Username)).Key;
+                clients.Remove(disconnectedUser);
+            }
+            
+            lock(users)
+            {
+                users.Remove(user.Username);
+            }
+
         }
     }
 }

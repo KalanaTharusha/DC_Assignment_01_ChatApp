@@ -13,9 +13,28 @@ namespace ChatServerInterface
     {
 
         [OperationContract]
-        void ConnectUser(string username);
+        [FaultContract(typeof(ServerFault))]
+        void ConnectUser(User user);
 
         [OperationContract]
-        void SendMessage(string username, string message);
+        void JoinChatRoom(string roomName, User user);
+
+        [OperationContract]
+        void ExitChatRoom(string roomName, User user);
+
+        [OperationContract]
+        void CreateChatRoom(string roomName);
+
+        [OperationContract]
+        List<string> getParticipants(string roomName);
+
+        [OperationContract]
+        void SendMessage(string roomName, Message message);
+
+        [OperationContract]
+        List<string> getChatRooms();
+
+        [OperationContract]
+        void DisconnectUser(User user);
     }
 }

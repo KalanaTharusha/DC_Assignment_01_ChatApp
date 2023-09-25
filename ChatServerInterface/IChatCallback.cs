@@ -4,12 +4,15 @@ using System.Linq;
 using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
+using DLL;
 
 namespace ChatServerInterface
 {
     public interface IChatCallback
     {
+
         [OperationContract(IsOneWay = true)]
-        void ReceiveMessage(string username, string message);
+        void ReceiveMessage(Message message);
+
     }
 }
