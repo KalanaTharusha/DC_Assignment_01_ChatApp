@@ -23,9 +23,6 @@ using System.Windows.Interop;
 
 namespace ChatClient
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window, IChatCallback
     {
         private IChatService service;
@@ -85,10 +82,11 @@ namespace ChatClient
             }
         }
 
+        /*
+         * Callback method from IChatCallback
+         */
         public void ReceiveMessage(Message message)
         {
-            //ChatTextBox.AppendText($"{message.Time.TimeOfDay.Hours}:{message.Time.TimeOfDay.Minutes} {message.From}: {message.Text}\n");
-
             Paragraph paragraph = new Paragraph();
             paragraph.Inlines.Add(new Run($"{message.Time.TimeOfDay.Hours}:{message.Time.TimeOfDay.Minutes} {message.From}: {message.Text}\n"));
             if (message.Attachemnt != null)
@@ -126,6 +124,9 @@ namespace ChatClient
         }
 
 
+        /*
+         * Navigation method added to hyperlink to open file when the filepath is clicked.
+         */
         private void OpenFileFromHyperLink(object sender, RequestNavigateEventArgs e)
         {
             try
@@ -205,7 +206,6 @@ namespace ChatClient
 
                     ChatTextBox.Document.Blocks.Clear();
 
-                    //UsersDDM.ItemsSource = service.getParticipants(currRoom).Where(p => p != user.Username).ToList();
                     chatRoomParticipantList = new ObservableCollection<string>(service.getParticipants(currRoom).Where(p => p != user.Username).ToList());
                     UsersDDM.ItemsSource = chatRoomParticipantList;
                     UsersDDM.SelectedIndex = 0;
@@ -284,6 +284,10 @@ namespace ChatClient
         }
 
 
+
+        /*
+         * Callback method from IChatCallback
+         */
         public void UpdateChatRoomInfo(string chatRoomName)
         {
            chatRoomList.Add(chatRoomName);
