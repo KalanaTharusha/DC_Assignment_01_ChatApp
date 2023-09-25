@@ -16,6 +16,10 @@ using ChatServerInterface;
 using System.ServiceModel;
 using DLL;
 using System.Collections.ObjectModel;
+using Microsoft.Win32;
+using System.IO;
+using System.Drawing;
+using System.Windows.Interop;
 
 namespace ChatClient
 {
@@ -29,6 +33,7 @@ namespace ChatClient
         private static ObservableCollection<string> chatRoomList = new ObservableCollection<string>();
         private ObservableCollection<string> chatRoomParticipantList;
         private string currRoom;
+        private string selectedFilePath;
 
         public MainWindow()
         {
@@ -40,7 +45,9 @@ namespace ChatClient
             try
             {
                 InstanceContext context = new InstanceContext(this);
-                DuplexChannelFactory<IChatService> factory = new DuplexChannelFactory<IChatService>(context, new NetTcpBinding(), "net.tcp://localhost:8000/ChatService");
+                NetTcpBinding netTcpBinding = new NetTcpBinding();
+                netTcpBinding.MaxReceivedMessageSize = 200_000_000;
+                DuplexChannelFactory<IChatService> factory = new DuplexChannelFactory<IChatService>(context, netTcpBinding, "net.tcp://localhost:8000/ChatService");
                 service = factory.CreateChannel();
 
                 string username = UsernameTextBox.Text;
@@ -83,6 +90,18 @@ namespace ChatClient
 
             Paragraph paragraph = new Paragraph();
             paragraph.Inlines.Add(new Run($"{message.Time.TimeOfDay.Hours}:{message.Time.TimeOfDay.Minutes} {message.From}: {message.Text}\n"));
+            if (message.Attachemnts != null)
+            {
+                MemoryStream memoryStream = new MemoryStream(message.Attachemnts);
+                Bitmap bitmap = new Bitmap(memoryStream);
+                System.Windows.Controls.Image image = new System.Windows.Controls.Image();
+
+                BitmapSource bitmapSource = Imaging.CreateBitmapSourceFromHBitmap(bitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                image.Source = bitmapSource;
+
+                InlineUIContainer inlineUIContainer = new InlineUIContainer(image);
+                paragraph.Inlines.Add(inlineUIContainer);
+            }
             ChatTextBox.Document.Blocks.Add(paragraph);
         }
 
@@ -93,9 +112,14 @@ namespace ChatClient
                 string to = UsersDDM.SelectedItem.ToString();
                 string text = MessageTextBox.Text;
 
+
                 if (!string.IsNullOrWhiteSpace(text))
                 {
                     Message message = new Message(text, user.Username, to);
+                    if (selectedFilePath != null)
+                    {
+                        message.setAttachment(File.ReadAllBytes(selectedFilePath));
+                    }
 
                     await Task.Run(() =>
                     {
@@ -104,6 +128,7 @@ namespace ChatClient
                 }
 
                 MessageTextBox.Clear();
+                SelectedFilePathLabel.Content = "Selected file : ";
 
             } catch(Exception ex)
             {
@@ -202,6 +227,29 @@ namespace ChatClient
                 MessageBox.Show(ex.Message);
             }
         }
+
+        private void SelectFileBtn_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Title = "Select a file to upload";
+
+                bool? result = openFileDialog.ShowDialog();
+
+                if (result == true)
+                {
+                    selectedFilePath = openFileDialog.FileName;
+                    string filename = System.IO.Path.GetFileName(selectedFilePath);
+                    SelectedFilePathLabel.Content = $"Selected file : {filename}";
+                }
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message);
+            }
+        }
+
 
         public void UpdateChatRoomInfo(string chatRoomName)
         {
