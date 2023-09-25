@@ -31,6 +31,6 @@ namespace DLL
         public string Text { get; set; }
 
         [DataMember]
-        public string Attachemnts { get; set; }
+        public byte[] Attachemnts { get; set; }
     }
 }

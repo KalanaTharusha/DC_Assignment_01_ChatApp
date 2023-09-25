@@ -16,6 +16,7 @@ using ChatServerInterface;
 using System.ServiceModel;
 using DLL;
 using System.Collections.ObjectModel;
+using Microsoft.Win32;
 
 namespace ChatClient
 {
@@ -196,6 +197,27 @@ namespace ChatClient
                 MessageBox.Show(ex.Message);
             }
         }
+
+        private void SelectFileBtn_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Title = "Select a file to upload";
+
+                bool? result = openFileDialog.ShowDialog();
+
+                if (result == true)
+                {
+                    string selectedFilePath = openFileDialog.FileName;
+                }
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message);
+            }
+        }
+
 
         public void UpdateChatRoomInfo(string chatRoomName)
         {
