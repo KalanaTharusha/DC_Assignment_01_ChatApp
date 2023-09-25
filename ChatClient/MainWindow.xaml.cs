@@ -124,10 +124,7 @@ namespace ChatClient
             {
                 if (currRoom != null)
                 {
-                    Task.Run(() =>
-                    {
-                        service.ExitChatRoom(currRoom, user);
-                    });
+                    service.ExitChatRoom(currRoom, user);
                 }
 
                 Object selectedRoom = RoomsDDM.SelectedItem;
@@ -205,21 +202,5 @@ namespace ChatClient
            chatRoomList.Add(chatRoomName);
         }
 
-        public void OnUserJoinedChatRoom(string username)
-        {
-            if (username != user.Username)
-            {
-                chatRoomParticipantList.Add(username);
-            }
-        }
-
-        public void OnUserLeaveChatRoom(string username)
-        {
-            
-            if (chatRoomParticipantList.Contains(username))
-            {
-                chatRoomParticipantList.Remove(username);
-            }
-        }
     }
 }
