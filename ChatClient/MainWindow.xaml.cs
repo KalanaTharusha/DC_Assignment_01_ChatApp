@@ -139,7 +139,6 @@ namespace ChatClient
 
                     ChatRoomLbl.Content = currRoom;
 
-                    //ChatTextBox.Clear();
                     ChatTextBox.Document.Blocks.Clear();
 
                     //UsersDDM.ItemsSource = service.getParticipants(currRoom).Where(p => p != user.Username).ToList();
@@ -201,20 +200,6 @@ namespace ChatClient
         public void UpdateChatRoomInfo(string chatRoomName)
         {
            chatRoomList.Add(chatRoomName);
-        }
-
-        public void OnUserJoinedChatRoom(string username)
-        {
-            //UsersDDM.Dispatcher.Invoke((Action)(() =>
-            //{
-            //UsersDDM.ItemsSource = service.getParticipants(currRoom).Where(p => p != user.Username).ToList();
-            //UsersDDM.SelectedIndex = 0;
-            //}));
-            MessageBox.Show("Callback trigger for onUserJoinedChatRoom");
-            if (username != user.Username)
-            {
-                chatRoomParticipantList.Add(username);
-            }
         }
 
     }
