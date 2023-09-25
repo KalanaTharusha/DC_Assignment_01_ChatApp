@@ -8,6 +8,7 @@ using System.ServiceModel.Description;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 using ChatServerInterface;
 
 namespace ChatServer
@@ -34,7 +35,12 @@ namespace ChatServer
             Console.WriteLine("Chat server started");
 
             ServiceHost host = new ServiceHost(typeof(ChatService));
-            host.AddServiceEndpoint(typeof(IChatService), new NetTcpBinding(), "net.tcp://localhost:8000/ChatService");
+            NetTcpBinding netTcpBinding = new NetTcpBinding();
+            netTcpBinding.MaxReceivedMessageSize = 200_000_000;
+            XmlDictionaryReaderQuotas readerQuotas = new System.Xml.XmlDictionaryReaderQuotas();
+            readerQuotas.MaxArrayLength = 200_000_000;
+            netTcpBinding.ReaderQuotas = readerQuotas;
+            host.AddServiceEndpoint(typeof(IChatService), netTcpBinding, "net.tcp://localhost:8000/ChatService");
             var behavior = new ServiceMetadataBehavior { HttpGetEnabled = false };
             host.Description.Behaviors.Add(behavior);
             host.Open();

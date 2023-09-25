@@ -32,5 +32,10 @@ namespace DLL
 
         [DataMember]
         public byte[] Attachemnts { get; set; }
+
+        public void setAttachment(byte[] attachment)
+        {
+            Attachemnts = attachment;
+        }
     }
 }
