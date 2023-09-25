@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ServiceModel;
 using DLL;
+using System.Collections.ObjectModel;
 
 namespace ChatServerInterface
 {
@@ -32,7 +33,7 @@ namespace ChatServerInterface
         void SendMessage(string roomName, Message message);
 
         [OperationContract]
-        List<string> getChatRooms();
+        ObservableCollection<string> getChatRooms();
 
         [OperationContract]
         void DisconnectUser(User user);

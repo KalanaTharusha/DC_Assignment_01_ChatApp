@@ -24,12 +24,14 @@ namespace ChatServerInterface
         {
             participants.Add(user, chatCallback);
             usernames.Add(user.Username);
+            chatCallback.OnUserJoinedChatRoom(user.Username);
         }
 
         public void RemoveParticipant(User user, IChatCallback chatCallback)
         {
             participants.Remove(user);
             usernames.Remove(user.Username);
+            chatCallback.OnUserLeaveChatRoom(user.Username);
         }
 
         public List<string> participantNames()
