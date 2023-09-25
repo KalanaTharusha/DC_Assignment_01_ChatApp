@@ -16,8 +16,6 @@ namespace ChatServer
         private static readonly Dictionary<User, IChatCallback> clients = new Dictionary<User, IChatCallback>();
         private static readonly List<ChatRoomService> chatRooms = new List<ChatRoomService>();
 
-        public static event Action chatRoomCreated;
-
         public ChatService()
         {
             if (chatRooms.Count == 0)
@@ -170,8 +168,17 @@ namespace ChatServer
 
         public void DisconnectUser(User user)
         {
-            clients.Remove(user);
-            users.Remove(user.Username);
+            lock(clients)
+            {
+                User disconnectedUser = clients.FirstOrDefault(u => u.Key.Username.Equals(user.Username)).Key;
+                clients.Remove(disconnectedUser);
+            }
+            
+            lock(users)
+            {
+                users.Remove(user.Username);
+            }
+
         }
     }
 }

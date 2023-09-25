@@ -23,11 +23,10 @@ namespace ChatClient
     /// </summary>
     public partial class MainWindow : Window, IChatCallback
     {
-        private IChatService foob;
+        private IChatService service;
         private User user;
         private static List<string> chatRoomList = new List<string>();
         private string currRoom;
-        private List<string> currUsers;
 
         public MainWindow()
         {
@@ -40,27 +39,31 @@ namespace ChatClient
             {
                 InstanceContext context = new InstanceContext(this);
                 DuplexChannelFactory<IChatService> factory = new DuplexChannelFactory<IChatService>(context, new NetTcpBinding(), "net.tcp://localhost:8000/ChatService");
-                foob = factory.CreateChannel();
+                service = factory.CreateChannel();
 
                 string username = UsernameTextBox.Text;
 
+                if (string.IsNullOrWhiteSpace(username))
+                {
+                    throw new Exception("Username cannot be empty!");
+                }
+
                 user = new User(username);
 
-                foob.ConnectUser(user);
+                service.ConnectUser(user);
 
                 Title = $"Chat Room - {username}";
 
                 MessageTextBox.IsEnabled = true;
                 SendBtn.IsEnabled = true;
 
-                chatRoomList = foob.getChatRooms();
+                chatRoomList = service.getChatRooms();
 
                 RoomsDDM.ItemsSource = chatRoomList;
 
-
-
                 LoginPanel.Visibility = Visibility.Collapsed;
                 ChatPanel.Visibility = Visibility.Visible;
+                TextPanel.Visibility = Visibility.Collapsed;
             }
             catch (FaultException<ServerFault> ex)
             {
@@ -79,44 +82,65 @@ namespace ChatClient
 
         private async void SendBtn_Click(object sender, RoutedEventArgs e)
         {
-            string to = UsersDDM.SelectedItem.ToString();
-            string text = MessageTextBox.Text;
-            Message message = new Message(text, user.Username, to);
-
-            await Task.Run(() =>
+            try
             {
-                foob.SendMessage(currRoom, message);
-            });
-            MessageTextBox.Clear();
+                string to = UsersDDM.SelectedItem.ToString();
+                string text = MessageTextBox.Text;
+
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    Message message = new Message(text, user.Username, to);
+
+                    await Task.Run(() =>
+                    {
+                        service.SendMessage(currRoom, message);
+                    });
+                }
+
+                MessageTextBox.Clear();
+
+            } catch(Exception ex)
+            {
+                MessageBox.Show($"{ex.Message}");
+            }
         }
 
         private void LogOutBtn_Click(object sender, RoutedEventArgs e)
         {
-            foob.DisconnectUser(user);
+            service.DisconnectUser(user);
             LoginPanel.Visibility = Visibility.Visible;
             ChatPanel.Visibility = Visibility.Collapsed;
         }
 
         private void JoinBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (currRoom != null)
+            try
             {
-                foob.ExitChatRoom(currRoom, user);
+                if (currRoom != null)
+                {
+                    service.ExitChatRoom(currRoom, user);
+                }
+
+                Object selectedRoom = RoomsDDM.SelectedItem;
+
+                if (selectedRoom != null)
+                {
+                    currRoom = selectedRoom.ToString();
+                    service.JoinChatRoom(currRoom, user);
+                    ChatRoomLbl.Content = currRoom;
+
+                    ChatTextBox.Clear();
+
+                    UsersDDM.ItemsSource = service.getParticipants(currRoom).Where(p => p != user.Username).ToList();
+                    UsersDDM.SelectedIndex = 0;
+
+                    TextPanel.Visibility = Visibility.Visible;
+
+                }
             }
-
-            Object selectedRoom = RoomsDDM.SelectedItem;
-
-            if (selectedRoom != null)
+            catch (Exception ex)
             {
-                currRoom = selectedRoom.ToString();
-                foob.JoinChatRoom(currRoom, user);
-                ChatRoomLbl.Content = currRoom;
-
-                ChatTextBox.Clear();
-                currUsers = foob.getParticipants(currRoom);
-                UsersDDM.ItemsSource = currUsers;
-                UsersDDM.SelectedIndex = 0;
-
+                MessageBox.Show(ex.Message);
             }
         }
 
@@ -125,9 +149,9 @@ namespace ChatClient
             try
             {
                 string newRoomName = CreateTextBox.Text;
-                foob.CreateChatRoom(newRoomName);
+                service.CreateChatRoom(newRoomName);
 
-                chatRoomList = foob.getChatRooms();
+                chatRoomList = service.getChatRooms();
                 RoomsDDM.ItemsSource = chatRoomList;
                 CreateTextBox.Clear();
             }
@@ -144,17 +168,23 @@ namespace ChatClient
 
         private void RefreashBtn_Click(object sender, RoutedEventArgs e)
         {
-            RoomsDDM.Dispatcher.Invoke(new Action(() =>
+            try
             {
-                RoomsDDM.ItemsSource = foob.getChatRooms();
-            }));
+                RoomsDDM.Dispatcher.Invoke(new Action(() =>
+                {
+                    RoomsDDM.ItemsSource = service.getChatRooms();
+                }));
 
-            UsersDDM.Dispatcher.Invoke((Action)(() =>
+                UsersDDM.Dispatcher.Invoke((Action)(() =>
+                {
+                    UsersDDM.ItemsSource = service.getParticipants(currRoom).Where(p => p != user.Username).ToList();
+                    UsersDDM.SelectedIndex = 0;
+                }));
+            }
+            catch (Exception ex)
             {
-                currUsers = foob.getParticipants(currRoom);
-                UsersDDM.ItemsSource = currUsers;
-                UsersDDM.SelectedIndex = 0;
-            }));
+                MessageBox.Show(ex.Message);
+            }
         }
 
     }
